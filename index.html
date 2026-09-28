@@ -1,26 +1,960 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Nebula — AI Chat</title>
-<meta name="description" content="A modern AI chatbot interface.">
+
 <style>
-:root{color-scheme:dark;--bg:#08090d;--panel:#101218;--panel2:#151821;--text:#f5f7fb;--muted:#949aaa;--line:#252936;--accent:#8b7cff;--accent2:#5eead4;--user:#202331;--shadow:0 24px 80px rgba(0,0,0,.35)}
-*{box-sizing:border-box}html,body{margin:0;height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}button,textarea{font:inherit}button{cursor:pointer}
-.app{height:100dvh;display:grid;grid-template-columns:260px 1fr;background:radial-gradient(circle at 70% -10%,rgba(139,124,255,.16),transparent 35%),var(--bg)}
-.sidebar{border-right:1px solid var(--line);background:rgba(10,11,16,.88);backdrop-filter:blur(20px);padding:16px;display:flex;flex-direction:column;gap:14px}.brand{display:flex;align-items:center;gap:10px;font-weight:750;font-size:18px;padding:7px}.logo{width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 8px 28px rgba(139,124,255,.3);display:grid;place-items:center;color:#08090d;font-weight:900}.new{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:12px;padding:11px 13px;text-align:left}.new:hover{border-color:#3b4050}.history{flex:1;overflow:auto}.history-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin:13px 8px}.chat-item{padding:9px 10px;border-radius:9px;color:#c8cbd5;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.chat-item.active,.chat-item:hover{background:var(--panel2);color:#fff}.side-foot{font-size:11px;color:var(--muted);padding:7px}.main{min-width:0;display:grid;grid-template-rows:62px 1fr auto}.top{border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 22px;background:rgba(8,9,13,.62);backdrop-filter:blur(18px)}.model{font-size:13px;color:#cfd2dc}.status{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)}.dot{width:7px;height:7px;border-radius:50%;background:#5eead4;box-shadow:0 0 12px #5eead4}.messages{overflow:auto;padding:34px max(18px,calc((100vw - 900px)/2));scroll-behavior:smooth}.welcome{max-width:720px;margin:11vh auto 0;text-align:center}.welcome h1{font-size:clamp(32px,5vw,52px);letter-spacing:-.045em;margin:0 0 12px;background:linear-gradient(90deg,#fff,#aaa8ff,#8eeadd);-webkit-background-clip:text;background-clip:text;color:transparent}.welcome p{color:var(--muted);margin:0 auto 24px}.chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.chip{background:var(--panel);border:1px solid var(--line);color:#cfd2dc;padding:9px 12px;border-radius:999px;font-size:12px}.msg{display:flex;gap:12px;margin:22px 0;animation:up .22s ease}.msg.user{justify-content:flex-end}.bubble{max-width:min(760px,85%);padding:13px 15px;border-radius:16px;line-height:1.6;font-size:14px;white-space:pre-wrap}.assistant .bubble{background:transparent;border:1px solid var(--line)}.user .bubble{background:var(--user);border:1px solid #2c3040}.avatar{width:30px;height:30px;flex:none;border-radius:9px;display:grid;place-items:center;font-size:12px;font-weight:800;background:var(--panel2);border:1px solid var(--line)}.user .avatar{order:2}.composer{padding:14px max(18px,calc((100vw - 900px)/2));border-top:1px solid var(--line);background:linear-gradient(transparent,rgba(8,9,13,.95) 18%)}.box{display:flex;align-items:end;gap:8px;background:var(--panel);border:1px solid #2b2f3a;border-radius:18px;padding:9px;box-shadow:var(--shadow)}textarea{resize:none;outline:0;border:0;background:transparent;color:var(--text);width:100%;min-height:42px;max-height:180px;padding:10px;font-size:14px;line-height:1.5}textarea::placeholder{color:#707584}.send{width:42px;height:42px;border:0;border-radius:12px;background:#fff;color:#0b0c10;font-weight:900}.send:disabled{opacity:.35}.hint{text-align:center;color:#626775;font-size:10px;margin-top:8px}@keyframes up{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
-@media(max-width:760px){.app{grid-template-columns:1fr}.sidebar{display:none}.top{padding:0 15px}.messages{padding:25px 14px}.composer{padding:10px 12px}.welcome{margin-top:14vh}.bubble{max-width:90%}}
-</style></head>
-<body><div class="app">
-<aside class="sidebar"><div class="brand"><div class="logo">N</div>Nebula</div><button class="new" id="newChat">＋ New chat</button><div class="history"><div class="history-title">Recent</div><div class="chat-item active">New conversation</div></div><div class="side-foot">Private interface · AI powered</div></aside>
-<main class="main"><header class="top"><div class="model">Nebula AI <span style="color:#626775">·</span> Smart Chat</div><div class="status"><span class="dot"></span> Ready</div></header>
-<section class="messages" id="messages"><div class="welcome" id="welcome"><h1>Ask anything.</h1><p>A clean, fast AI workspace for questions, ideas, coding and learning.</p><div class="chips"><button class="chip">Explain a difficult topic</button><button class="chip">Help me write</button><button class="chip">Solve a problem</button></div></div></section>
-<form class="composer" id="form"><div class="box"><textarea id="input" rows="1" placeholder="Message Nebula…" autocomplete="off"></textarea><button class="send" id="send" aria-label="Send">↑</button></div><div class="hint">Enter to send · Shift + Enter for a new line</div></form></main></div>
+:root{
+  --bg:#f7f7fa;
+  --panel:#ffffff;
+  --panel2:#f0f1f5;
+  --text:#17181d;
+  --muted:#777b87;
+  --border:#e4e5ea;
+  --accent:#635bff;
+  --user:#eeeaff;
+  --shadow:0 18px 55px rgba(30,35,60,.08);
+}
+
+.dark{
+  --bg:#0b0d12;
+  --panel:#12151c;
+  --panel2:#191d26;
+  --text:#f4f5f7;
+  --muted:#969cab;
+  --border:#292e39;
+  --accent:#8b7cff;
+  --user:#211d35;
+  --shadow:0 18px 55px rgba(0,0,0,.25);
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  height:100vh;
+  overflow:hidden;
+}
+
+button,input,textarea{font:inherit}
+
+.app{
+  display:flex;
+  height:100vh;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+  width:270px;
+  background:var(--panel);
+  border-right:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  padding:16px;
+  transition:.25s;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  font-weight:800;
+  font-size:19px;
+  padding:7px 8px 20px;
+}
+
+.logo{
+  width:34px;
+  height:34px;
+  border-radius:11px;
+  background:linear-gradient(135deg,#635bff,#9a75ff);
+  display:grid;
+  place-items:center;
+  color:white;
+  font-size:18px;
+  box-shadow:0 8px 25px rgba(99,91,255,.25);
+}
+
+.newchat{
+  border:1px solid var(--border);
+  background:var(--panel);
+  color:var(--text);
+  padding:11px 13px;
+  border-radius:12px;
+  cursor:pointer;
+  text-align:left;
+}
+
+.newchat:hover,
+.sidebtn:hover{
+  background:var(--panel2);
+}
+
+.side-title{
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  color:var(--muted);
+  padding:23px 8px 9px;
+}
+
+.history{
+  overflow:auto;
+  flex:1;
+}
+
+.chatitem{
+  padding:10px 11px;
+  border-radius:10px;
+  color:var(--muted);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  cursor:pointer;
+  margin-bottom:3px;
+}
+
+.chatitem.active,
+.chatitem:hover{
+  background:var(--panel2);
+  color:var(--text);
+}
+
+.sidebottom{
+  border-top:1px solid var(--border);
+  padding-top:12px;
+}
+
+.sidebtn{
+  width:100%;
+  border:0;
+  background:transparent;
+  color:var(--text);
+  padding:10px;
+  border-radius:10px;
+  text-align:left;
+  cursor:pointer;
+}
+
+/* MAIN */
+
+.main{
+  flex:1;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+}
+
+.topbar{
+  height:64px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 20px;
+  background:var(--panel);
+}
+
+.model{
+  font-weight:700;
+}
+
+.status{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:2px;
+}
+
+.iconbtn{
+  width:38px;
+  height:38px;
+  border:1px solid var(--border);
+  background:var(--panel);
+  color:var(--text);
+  border-radius:10px;
+  cursor:pointer;
+}
+
+.messages{
+  flex:1;
+  overflow:auto;
+  padding:34px 18px 130px;
+}
+
+.wrap{
+  max-width:850px;
+  margin:auto;
+}
+
+.hero{
+  text-align:center;
+  padding:10vh 10px 35px;
+}
+
+.hero h1{
+  font-size:clamp(32px,6vw,54px);
+  margin:0 0 10px;
+  letter-spacing:-.04em;
+}
+
+.hero p{
+  color:var(--muted);
+  margin:0;
+}
+
+/* MESSAGES */
+
+.msg{
+  display:flex;
+  gap:12px;
+  margin:0 auto 25px;
+  max-width:850px;
+}
+
+.avatar{
+  width:32px;
+  height:32px;
+  min-width:32px;
+  border-radius:10px;
+  display:grid;
+  place-items:center;
+  background:var(--panel2);
+  font-size:13px;
+  font-weight:700;
+}
+
+.msg.user .avatar{
+  background:var(--accent);
+  color:white;
+}
+
+.bubble{
+  line-height:1.65;
+  max-width:calc(100% - 45px);
+  white-space:pre-wrap;
+}
+
+.msg.user .bubble{
+  background:var(--user);
+  padding:11px 15px;
+  border-radius:15px 15px 4px 15px;
+}
+
+.msg.ai .bubble{
+  padding-top:3px;
+}
+
+/* COMPOSER */
+
+.composer{
+  position:fixed;
+  bottom:0;
+  left:270px;
+  right:0;
+  padding:15px 18px 20px;
+  background:linear-gradient(transparent,var(--bg) 25%);
+}
+
+.composebox{
+  max-width:850px;
+  margin:auto;
+  background:var(--panel);
+  border:1px solid var(--border);
+  box-shadow:var(--shadow);
+  border-radius:18px;
+  padding:10px;
+  display:flex;
+  gap:8px;
+  align-items:flex-end;
+}
+
+textarea{
+  resize:none;
+  flex:1;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:var(--text);
+  padding:10px;
+  min-height:42px;
+  max-height:150px;
+}
+
+.send{
+  width:42px;
+  height:42px;
+  border:0;
+  border-radius:12px;
+  background:var(--accent);
+  color:#fff;
+  cursor:pointer;
+  font-size:18px;
+}
+
+.send:disabled{
+  opacity:.45;
+}
+
+.hint{
+  max-width:850px;
+  margin:7px auto 0;
+  text-align:center;
+  font-size:11px;
+  color:var(--muted);
+}
+
+.menu{
+  display:none;
+}
+
+/* MOBILE */
+
+@media(max-width:700px){
+
+  .sidebar{
+    position:fixed;
+    z-index:5;
+    left:-280px;
+    top:0;
+    bottom:0;
+  }
+
+  .sidebar.open{
+    left:0;
+    box-shadow:20px 0 50px rgba(0,0,0,.2);
+  }
+
+  .composer{
+    left:0;
+  }
+
+  .topbar{
+    padding:0 12px;
+  }
+
+  .messages{
+    padding-left:12px;
+    padding-right:12px;
+  }
+
+  .hero{
+    padding-top:8vh;
+  }
+
+  .menu{
+    display:block;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<aside class="sidebar" id="sidebar">
+
+  <div class="brand">
+    <div class="logo">✦</div>
+    Nebula
+  </div>
+
+  <button class="newchat" onclick="newChat()">
+    ＋ New chat
+  </button>
+
+  <div class="side-title">
+    Conversations
+  </div>
+
+  <div class="history" id="history"></div>
+
+  <div class="sidebottom">
+
+    <button class="sidebtn" onclick="toggleTheme()">
+      ☾ &nbsp; Toggle appearance
+    </button>
+
+    <button class="sidebtn" onclick="clearChats()">
+      ⌫ &nbsp; Clear conversations
+    </button>
+
+  </div>
+
+</aside>
+
+
+<main class="main">
+
+<header class="topbar">
+
+  <div style="display:flex;align-items:center;gap:10px">
+
+    <button class="iconbtn menu" onclick="toggleSidebar()">
+      ☰
+    </button>
+
+    <div>
+      <div class="model">Nebula AI</div>
+      <div class="status">Ready to chat</div>
+    </div>
+
+  </div>
+
+  <button class="iconbtn" onclick="toggleTheme()">
+    ☼
+  </button>
+
+</header>
+
+
+<section class="messages" id="messages">
+
+  <div class="wrap" id="messageWrap">
+
+    <div class="hero">
+
+      <h1>What can I help with?</h1>
+
+      <p>
+        Ask Nebula anything. Your AI workspace starts here.
+      </p>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<div class="composer">
+
+  <div class="composebox">
+
+    <textarea
+      id="input"
+      rows="1"
+      placeholder="Message Nebula..."
+      oninput="resizeBox(this)"
+      onkeydown="keySend(event)"
+    ></textarea>
+
+    <button
+      class="send"
+      id="send"
+      onclick="sendMessage()"
+    >
+      ↑
+    </button>
+
+  </div>
+
+  <div class="hint">
+    Nebula is currently running in demo mode. A secure AI backend can be connected next.
+  </div>
+
+</div>
+
+</main>
+
+</div>
+
+
 <script>
-const API_URL='YOUR_WORKER_URL';
-const messages=document.querySelector('#messages'),welcome=document.querySelector('#welcome'),input=document.querySelector('#input'),form=document.querySelector('#form'),send=document.querySelector('#send'),newChat=document.querySelector('#newChat');
-let history=[];
-function add(role,text){if(welcome)welcome.remove();const row=document.createElement('div');row.className='msg '+role;const av=document.createElement('div');av.className='avatar';av.textContent=role==='user'?'Y':'N';const b=document.createElement('div');b.className='bubble';b.textContent=text;row.append(role==='user'?b:av,role==='user'?av:b);messages.append(row);messages.scrollTop=messages.scrollHeight;return b}
-async function ask(text){add('user',text);history.push({role:'user',content:text});const bubble=add('assistant','Thinking…');send.disabled=true;try{if(API_URL==='YOUR_WORKER_URL')throw new Error('Set API_URL to your deployed Worker URL.');const r=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:history})});if(!r.ok)throw new Error('Server error '+r.status);const data=await r.json();const answer=data.answer||'No answer returned.';bubble.textContent=answer;history.push({role:'assistant',content:answer})}catch(e){bubble.textContent='Connection not configured yet. Deploy the Worker and replace YOUR_WORKER_URL in index.html.\n\n'+e.message}finally{send.disabled=false;input.focus()}}
-form.addEventListener('submit',e=>{e.preventDefault();const t=input.value.trim();if(!t||send.disabled)return;input.value='';input.style.height='auto';ask(t)});input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();form.requestSubmit()}});input.addEventListener('input',()=>{input.style.height='auto';input.style.height=Math.min(input.scrollHeight,180)+'px'});document.querySelectorAll('.chip').forEach(x=>x.onclick=()=>{input.value=x.textContent;form.requestSubmit()});newChat.onclick=()=>{location.reload()};
-</script></body></html>
+
+const KEY = "nebula_chats_v2";
+const THEME = "nebula_theme";
+
+let chats = JSON.parse(localStorage.getItem(KEY) || "[]");
+
+let current =
+  chats[0]?.id ||
+  Date.now().toString();
+
+
+function save(){
+
+  localStorage.setItem(
+    KEY,
+    JSON.stringify(chats)
+  );
+
+}
+
+
+function currentChat(){
+
+  let c = chats.find(
+    x => x.id === current
+  );
+
+  if(!c){
+
+    c = {
+      id:current,
+      title:"New chat",
+      messages:[]
+    };
+
+    chats.unshift(c);
+
+    save();
+
+  }
+
+  return c;
+
+}
+
+
+function renderHistory(){
+
+  const h =
+    document.getElementById("history");
+
+  h.innerHTML =
+    chats.map(c => `
+
+      <div
+        class="chatitem ${c.id===current?"active":""}"
+        onclick="openChat('${c.id}')"
+      >
+
+        ${esc(c.title)}
+
+      </div>
+
+    `).join("");
+
+}
+
+
+function renderMessages(){
+
+  const wrap =
+    document.getElementById("messageWrap");
+
+  const c =
+    currentChat();
+
+  wrap.innerHTML = "";
+
+  if(!c.messages.length){
+
+    wrap.innerHTML = `
+
+      <div class="hero">
+
+        <h1>What can I help with?</h1>
+
+        <p>
+          Ask Nebula anything. Your AI workspace starts here.
+        </p>
+
+      </div>
+
+    `;
+
+  }
+  else{
+
+    c.messages.forEach(
+      m => addMessage(
+        m.role,
+        m.text,
+        false
+      )
+    );
+
+  }
+
+  scrollBottom();
+
+  renderHistory();
+
+}
+
+
+function addMessage(
+  role,
+  text,
+  scroll=true
+){
+
+  const wrap =
+    document.getElementById(
+      "messageWrap"
+    );
+
+  const row =
+    document.createElement("div");
+
+  row.className =
+    "msg " + role;
+
+  row.innerHTML = `
+
+    <div class="avatar">
+      ${role==="user" ? "You" : "✦"}
+    </div>
+
+    <div class="bubble">
+      ${format(text)}
+    </div>
+
+  `;
+
+  wrap.appendChild(row);
+
+  if(scroll)
+    scrollBottom();
+
+}
+
+
+function format(t){
+
+  return esc(t)
+    .replace(
+      /```([\s\S]*?)```/g,
+      '<pre style="background:var(--panel2);padding:12px;border-radius:10px;overflow:auto">$1</pre>'
+    )
+    .replace(
+      /\*\*(.*?)\*\*/g,
+      "<strong>$1</strong>"
+    )
+    .replace(
+      /\n/g,
+      "<br>"
+    );
+
+}
+
+
+function esc(t){
+
+  return String(t).replace(
+    /[&<>"']/g,
+    s => ({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#39;"
+    }[s])
+  );
+
+}
+
+
+function scrollBottom(){
+
+  const m =
+    document.getElementById(
+      "messages"
+    );
+
+  m.scrollTop =
+    m.scrollHeight;
+
+}
+
+
+function resizeBox(el){
+
+  el.style.height="auto";
+
+  el.style.height =
+    Math.min(
+      el.scrollHeight,
+      150
+    ) + "px";
+
+}
+
+
+function keySend(e){
+
+  if(
+    e.key==="Enter" &&
+    !e.shiftKey
+  ){
+
+    e.preventDefault();
+
+    sendMessage();
+
+  }
+
+}
+
+
+function newChat(){
+
+  current =
+    Date.now().toString();
+
+  chats.unshift({
+
+    id:current,
+
+    title:"New chat",
+
+    messages:[]
+
+  });
+
+  save();
+
+  renderMessages();
+
+  document
+    .getElementById("input")
+    .focus();
+
+}
+
+
+function openChat(id){
+
+  current=id;
+
+  renderMessages();
+
+  if(innerWidth<700)
+    toggleSidebar();
+
+}
+
+
+function clearChats(){
+
+  if(
+    confirm(
+      "Clear all saved conversations?"
+    )
+  ){
+
+    chats=[];
+
+    newChat();
+
+  }
+
+}
+
+
+function toggleTheme(){
+
+  document.body
+    .classList
+    .toggle("dark");
+
+  localStorage.setItem(
+    THEME,
+    document.body.classList.contains("dark")
+      ? "dark"
+      : "light"
+  );
+
+}
+
+
+function toggleSidebar(){
+
+  document
+    .getElementById("sidebar")
+    .classList
+    .toggle("open");
+
+}
+
+
+async function sendMessage(){
+
+  const input =
+    document.getElementById(
+      "input"
+    );
+
+  const text =
+    input.value.trim();
+
+  const btn =
+    document.getElementById(
+      "send"
+    );
+
+  if(!text || btn.disabled)
+    return;
+
+  const c =
+    currentChat();
+
+  if(!c.messages.length){
+
+    c.title =
+      text.slice(0,34) +
+      (text.length>34 ? "…" : "");
+
+  }
+
+  c.messages.push({
+    role:"user",
+    text:text
+  });
+
+  save();
+
+  renderMessages();
+
+  input.value="";
+
+  resizeBox(input);
+
+  btn.disabled=true;
+
+
+  /*
+    DEMO RESPONSE
+
+    This is where the secure AI backend
+    will eventually be connected.
+  */
+
+  await new Promise(
+    r => setTimeout(r,650)
+  );
+
+
+  const reply =
+    demoReply(text);
+
+  c.messages.push({
+    role:"ai",
+    text:reply
+  });
+
+  save();
+
+  addMessage(
+    "ai",
+    reply
+  );
+
+  btn.disabled=false;
+
+  input.focus();
+
+  renderHistory();
+
+}
+
+
+function demoReply(t){
+
+  const q =
+    t.toLowerCase();
+
+
+  if(
+    q.includes("hello") ||
+    q.includes("hi ")
+  ){
+
+    return `
+Hello! I'm Nebula.
+
+The interface is ready. The next step is connecting a secure AI backend so I can generate real AI responses.
+`;
+
+  }
+
+
+  if(
+    q.includes("who are you")
+  ){
+
+    return `
+I'm Nebula, your AI-chat interface.
+
+Right now I'm running in demo mode. Once the backend is connected, I'll be able to send your prompts to a real AI model.
+`;
+
+  }
+
+
+  if(
+    q.includes("code") ||
+    q.includes("html") ||
+    q.includes("javascript")
+  ){
+
+    return `
+I can help with coding once the real AI backend is connected.
+
+The important part is already prepared: Nebula's frontend has a dedicated place for the backend connection.
+`;
+
+  }
+
+
+  if(
+    q.includes("math") ||
+    q.includes("calculate")
+  ){
+
+    return `
+I can handle calculations through the real AI backend.
+
+The current demo mode is intentionally limited, but the chat interface itself is working.
+`;
+
+  }
+
+
+  return `
+Your message was received.
+
+Nebula's interface is working correctly. The next step is connecting the secure backend so responses come from a real AI model.
+`;
+
+}
+
+
+if(
+  localStorage.getItem(THEME)==="dark"
+){
+
+  document.body
+    .classList
+    .add("dark");
+
+}
+
+
+if(!chats.length){
+
+  chats=[{
+    id:current,
+    title:"New chat",
+    messages:[]
+  }];
+
+}
+
+
+save();
+
+renderMessages();
+
+</script>
+
+</body>
+</html>
